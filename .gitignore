@@ -1,0 +1,10 @@
+# settings
+.env
+drivers/
+.vscode/
+
+# caches
+__pycache__/
+*.log
+.DS_Store
+.wakatime-project
