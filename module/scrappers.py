@@ -23,6 +23,11 @@ class VibeScrapper(Scrapper):
             link = "https://vibe.naver.com/library/tracks"
             self.firefox_driver.get(link)
             sleep(3)
+            """
+            TODO
+            더보기(.btn_more_list)가 화면에 더이상 없을 때까지 누르는 걸 구현
+            현재는 한번만 클릭하도록 해놓은 상태
+            """
             self.firefox_driver.execute_script(
                 "window.scrollTo(0, document.body.scrollHeight);"
             )
