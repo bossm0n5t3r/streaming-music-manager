@@ -14,6 +14,20 @@ class Scrapper(metaclass=ABCMeta):
 
 
 class VibeScrapper(Scrapper):
+    def find_btn_more_list(self):
+        isFound = True
+        while isFound:
+            try:
+                self.firefox_driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);"
+                )
+                sleep(1)
+                self.firefox_driver.find_element_by_class_name("btn_more_list").click()
+                sleep(3)
+            except:
+                print("There is no more btn_more_list button")
+                isFound = False
+
     def scrap_like(self):
         try:
             isVibeLoginSuccess = self.utils.vibe_login(
@@ -24,17 +38,7 @@ class VibeScrapper(Scrapper):
                 link = "https://vibe.naver.com/library/tracks"
                 self.firefox_driver.get(link)
                 sleep(3)
-                """
-                TODO
-                더보기(.btn_more_list)가 화면에 더이상 없을 때까지 누르는 걸 구현
-                현재는 한번만 클릭하도록 해놓은 상태
-                """
-                self.firefox_driver.execute_script(
-                    "window.scrollTo(0, document.body.scrollHeight);"
-                )
-                sleep(1)
-                self.firefox_driver.find_element_by_class_name("btn_more_list").click()
-                sleep(3)
+                self.find_btn_more_list()
                 soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
                 title = soup.select(
                     "#content > div > div.track_section > div > div > table > tbody > tr > td.song > div.title_badge_wrap > span > a"
