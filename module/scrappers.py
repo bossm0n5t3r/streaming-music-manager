@@ -1,7 +1,9 @@
 from time import sleep
 from abc import ABCMeta, abstractmethod
 from bs4 import BeautifulSoup
+from selenium.webdriver.common.keys import Keys
 from module.utils import Utils
+import pyperclip
 
 
 class Scrapper(metaclass=ABCMeta):
@@ -57,6 +59,51 @@ class VibeScrapper(Scrapper):
                 print("Scrap VIBE like songs Successed")
         except:
             print("Failed to scrap VIBE Playlist")
+        finally:
+            self.utils.shutdown(
+                msg="VibeScrapper is closed", driver=self.firefox_driver
+            )
+
+    def generate_search_keyword(self, song, singer):
+        if singer is None:
+            return song
+        else:
+            return song + " - " + singer
+
+    def insert_keyword(self, search_keyword):
+        pyperclip.copy(search_keyword)
+        search_element = self.firefox_driver.find_element_by_class_name("input_search")
+        search_element.click()
+        sleep(1)
+        search_element.send_keys(Keys.COMMAND, "v")
+        sleep(1)
+        search_element.send_keys(Keys.ENTER)
+        sleep(1)
+
+    def click_like(self):
+        self.firefox_driver.find_element_by_css_selector(
+            "#content > div:nth-child(2) > div > div:nth-child(2) > div.option"
+        ).click()
+        sleep(1)
+        self.firefox_driver.find_element_by_css_selector(
+            "#content > div:nth-child(2) > div > div:nth-child(2) > div.option > div > div > div > a:nth-child(2)"
+        ).click()
+        sleep(1)
+
+    def like(self, song, singer=None):
+        try:
+            isVibeLoginSuccess = self.utils.vibe_login(
+                driver=self.firefox_driver, id=self.id, pw=self.pw
+            )
+            if isVibeLoginSuccess:
+                print("add song into like list")
+                self.firefox_driver.find_element_by_class_name("btn_search").click()
+                sleep(1)
+                search_keyword = self.generate_search_keyword(song, singer)
+                self.insert_keyword(search_keyword)
+                self.click_like()
+        except:
+            print("Failed to add song into like list")
         finally:
             self.utils.shutdown(
                 msg="VibeScrapper is closed", driver=self.firefox_driver
