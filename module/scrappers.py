@@ -1,4 +1,5 @@
 from time import sleep
+from urllib.parse import quote
 from abc import ABCMeta, abstractmethod
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.keys import Keys
@@ -64,21 +65,13 @@ class VibeScrapper(Scrapper):
                 msg="VibeScrapper is closed", driver=self.firefox_driver
             )
 
-    def generate_search_keyword(self, song, singer):
+    def generate_url_safe_search_keyword(self, song, singer):
+        keyword = ""
         if singer is None:
-            return song
+            keyword = song
         else:
-            return song + " - " + singer
-
-    def insert_keyword(self, search_keyword):
-        pyperclip.copy(search_keyword)
-        search_element = self.firefox_driver.find_element_by_class_name("input_search")
-        search_element.click()
-        sleep(1)
-        search_element.send_keys(Keys.COMMAND, "v")
-        sleep(1)
-        search_element.send_keys(Keys.ENTER)
-        sleep(1)
+            keyword = song + " - " + singer
+        return quote(keyword)
 
     def click_like(self):
         self.firefox_driver.find_element_by_css_selector(
@@ -97,10 +90,13 @@ class VibeScrapper(Scrapper):
             )
             if isVibeLoginSuccess:
                 print("add song into like list")
-                self.firefox_driver.find_element_by_class_name("btn_search").click()
-                sleep(1)
-                search_keyword = self.generate_search_keyword(song, singer)
-                self.insert_keyword(search_keyword)
+                # https://vibe.naver.com/search?query=Day%20Dreaming%20-%20Jack%20%26%20Jack
+                url_safe_search_keyword = self.generate_url_safe_search_keyword(
+                    song, singer
+                )
+                self.firefox_driver.get(
+                    "https://vibe.naver.com/search?query=" + url_safe_search_keyword
+                )
                 self.click_like()
         except:
             print("Failed to add song into like list")
