@@ -11,8 +11,9 @@ def main():
     migrator = VibeScrapper(id=id, pw=pw)
     # migrator.scrap_like()
     # migrator.like("Day Dreaming", "Jack & Jack")
-    migrator.like("Day Dreaming")
+    # migrator.like("Day Dreaming")
     # migrator.add_play_list("test")
+    migrator.add_songs_into_play_list("test", ["Day Dreaming || Jack & Jack", "hello"])
 
 
 if __name__ == "__main__":

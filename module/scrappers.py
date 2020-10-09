@@ -65,7 +65,7 @@ class VibeScrapper(Scrapper):
                 msg="VibeScrapper is closed", driver=self.firefox_driver
             )
 
-    def generate_url_safe_search_keyword(self, song, singer):
+    def generate_url_safe_search_keyword(self, song, singer=None):
         keyword = ""
         if singer is None:
             keyword = song
@@ -87,6 +87,20 @@ class VibeScrapper(Scrapper):
     def click_song_option_like(self):
         self.firefox_driver.find_element_by_css_selector(
             "#content > div:nth-child(2) > div > div:nth-child(2) > div.option > div > div > div > a:nth-child(2)"
+        ).click()
+        sleep(1)
+
+    def click_song_option_add_play_list(self, play_list_name):
+        self.firefox_driver.find_element_by_css_selector(
+            "#content > div:nth-child(2) > div > div:nth-child(2) > div.option > div > div > div > a:nth-child(3)"
+        ).click()
+        sleep(1)
+        self.firefox_driver.find_element_by_xpath(
+            '//img[@alt="' + play_list_name + ' 플레이리스트 커버"]'
+        ).click()
+        sleep(1)
+        self.firefox_driver.find_element_by_css_selector(
+            "#app > div.modal > div > div > div > a"
         ).click()
         sleep(1)
 
@@ -138,6 +152,60 @@ class VibeScrapper(Scrapper):
                 print("Add new play list Successed")
         except:
             print("Failed to add new play list")
+        finally:
+            self.utils.shutdown(
+                msg="VibeScrapper is closed", driver=self.firefox_driver
+            )
+
+    def get_all_play_list_title_list(self):
+        self.firefox_driver.get("https://vibe.naver.com/library/playlists")
+        sleep(1)
+        soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
+        play_list_title_list_data = soup.select(
+            "#content > div > div.sub_list > ul > li > div > div.info > a > span.text"
+        )
+        play_list_title_list = []
+        for i in range(len(play_list_title_list_data)):
+            play_list_title_list.append(play_list_title_list_data[i].text)
+        return play_list_title_list
+
+    def add_songs_into_play_list(self, play_list_name, song_datas):
+        # 노래 리스트로 받을 경우, 파일 경로 X
+        try:
+            # 로그인
+            isVibeLoginSuccess = self.utils.vibe_login(
+                driver=self.firefox_driver, id=self.id, pw=self.pw
+            )
+            if isVibeLoginSuccess:
+                print("add songs into play list")
+                # play_list_name으로 play_list 찾기
+                all_play_list_titles = self.get_all_play_list_title_list()
+                # 없으면 생성
+                if play_list_name not in all_play_list_titles:
+                    self.add_play_list(play_list_name)
+                for song_data in song_datas:
+                    # 각 노래마다 검색
+                    song, singer = None, None
+                    if "||" in song_data:
+                        song, singer = [
+                            x.strip()
+                            for x in list(
+                                map(str, "Day Dreaming || Jack & Jack".split("||"))
+                            )
+                        ]
+                    else:
+                        song = song_data
+                    url_safe_search_keyword = self.generate_url_safe_search_keyword(
+                        song_data
+                    )
+                    self.find_song(url_safe_search_keyword)
+
+                    # 각 노래마다 play_list에 추가하기
+                    self.click_song_option()
+                    self.click_song_option_add_play_list(play_list_name)
+                print("Add songs into play list Successed")
+        except:
+            print("Failed to add songs into play list")
         finally:
             self.utils.shutdown(
                 msg="VibeScrapper is closed", driver=self.firefox_driver
