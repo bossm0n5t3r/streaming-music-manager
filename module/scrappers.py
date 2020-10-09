@@ -90,7 +90,6 @@ class VibeScrapper(Scrapper):
             )
             if isVibeLoginSuccess:
                 print("add song into like list")
-                # https://vibe.naver.com/search?query=Day%20Dreaming%20-%20Jack%20%26%20Jack
                 url_safe_search_keyword = self.generate_url_safe_search_keyword(
                     song, singer
                 )
@@ -98,8 +97,41 @@ class VibeScrapper(Scrapper):
                     "https://vibe.naver.com/search?query=" + url_safe_search_keyword
                 )
                 self.click_like()
+                print("Add song into like list Successed")
         except:
             print("Failed to add song into like list")
+        finally:
+            self.utils.shutdown(
+                msg="VibeScrapper is closed", driver=self.firefox_driver
+            )
+
+    def add_play_list(self, play_list_name):
+        try:
+            isVibeLoginSuccess = self.utils.vibe_login(
+                driver=self.firefox_driver, id=self.id, pw=self.pw
+            )
+            if isVibeLoginSuccess:
+                print("Add new play list")
+                self.firefox_driver.get("https://vibe.naver.com/library/playlists")
+                add_item_element = self.firefox_driver.find_element_by_class_name(
+                    "btn_add_item"
+                )
+                add_item_element.click()
+                sleep(1)
+                input_playlist_element = self.firefox_driver.find_element_by_class_name(
+                    "input_playlist"
+                )
+                input_playlist_element.click()
+                pyperclip.copy(play_list_name)
+                input_playlist_element.send_keys(Keys.COMMAND, "v")
+                sleep(1)
+                self.firefox_driver.find_element_by_css_selector(
+                    "#app > div.modal > div > div > div > a.point"
+                ).click()
+                sleep(1)
+                print("Add new play list Successed")
+        except:
+            print("Failed to add new play list")
         finally:
             self.utils.shutdown(
                 msg="VibeScrapper is closed", driver=self.firefox_driver

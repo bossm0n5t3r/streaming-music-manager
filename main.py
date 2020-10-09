@@ -10,7 +10,9 @@ def main():
     pw = os.getenv("NAVER_VIBE_PW")
     migrator = VibeScrapper(id=id, pw=pw)
     # migrator.scrap_like()
-    migrator.like("Day Dreaming", "Jack & Jack")
+    # migrator.like("Day Dreaming", "Jack & Jack")
+    # migrator.like("Day Dreaming")
+    migrator.add_play_list("test")
 
 
 if __name__ == "__main__":
