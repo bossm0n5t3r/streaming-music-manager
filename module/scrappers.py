@@ -318,7 +318,7 @@ class MelonScrapper(Scrapper):
                 int(x)
                 for x in self.firefox_driver.find_element_by_class_name("page_num").text
             ]
-            plist = self.scrap_my_page()
+            plist = []
             for page_num in max_page:
                 plist += self.scrap_my_page(page_num)
             with open(
@@ -329,7 +329,53 @@ class MelonScrapper(Scrapper):
             f.close()
             print("Scrap Melon My Playlist Successed")
         except:
-            print("Failed to scrap Melon Playlist")
+            print("Failed to scrap Melon My Playlist")
+        finally:
+            self.utils.shutdown(
+                msg="MelonScrapper is closed", driver=self.firefox_driver
+            )
+
+    def scrap_dj_page(self, page=None):
+        if page is not None:
+            self.firefox_driver.execute_script(
+                "javascript:pageObj.sendPage('" + str(page * 50 + 1) + "')"
+            )
+        soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
+        title = soup.select(
+            "#frm > div > table > tbody > tr > td:nth-child(5) > div > div > div.ellipsis.rank01 > span > a"
+        )
+        singer = soup.select(
+            "#frm > div > table > tbody > tr > td:nth-child(5) > div > div > div.ellipsis.rank02 > a"
+        )
+        plist = []
+        for i in range(len(title)):
+            plist.append(title[i].text + " || " + singer[i].text)
+        return plist
+
+    def scrap_dj_play_list(self, plylstSeq):
+        try:
+            link = (
+                "https://www.melon.com/mymusic/dj/mymusicdjplaylistview_inform.htm?plylstSeq="
+                + str(plylstSeq)
+            )
+            self.firefox_driver.get(link)
+            sleep(1)
+            max_page = [
+                int(x)
+                for x in self.firefox_driver.find_element_by_class_name("page_num").text
+            ]
+            plist = []
+            for page_num in max_page:
+                plist += self.scrap_dj_page(page_num)
+            with open(
+                "Melon_" + str(plylstSeq) + "_DJ_Playlist.txt", "w", encoding="utf-8"
+            ) as f:
+                for data in plist:
+                    f.write("%s\n" % data)
+            f.close()
+            print("Scrap Melon Dj Playlist Successed")
+        except:
+            print("Failed to scrap Melon Dj Playlist")
         finally:
             self.utils.shutdown(
                 msg="MelonScrapper is closed", driver=self.firefox_driver

@@ -17,7 +17,8 @@ def main():
     # migrator.scrap_my_play_list(66087627)
     # migrator.scrap_vibe_play_list("mood_lofi_0001")
     migrator = MelonScrapper()
-    migrator.scrap_my_play_list(473916599)
+    # migrator.scrap_my_play_list(473916599)
+    migrator.scrap_dj_play_list(439646354)
 
 
 if __name__ == "__main__":
