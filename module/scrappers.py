@@ -96,7 +96,7 @@ class VibeScrapper(Scrapper):
         ).click()
         sleep(1)
         self.firefox_driver.find_element_by_xpath(
-            '//img[@alt="' + play_list_name + ' 플레이리스트 커버"]'
+            '//em[@class="ly_playlist_title" and text()="' + play_list_name + '"]'
         ).click()
         sleep(1)
         self.firefox_driver.find_element_by_css_selector(
@@ -183,20 +183,18 @@ class VibeScrapper(Scrapper):
                 # 없으면 생성
                 if play_list_name not in all_play_list_titles:
                     self.add_play_list(play_list_name)
+                sleep(1)
                 for song_data in song_datas:
                     # 각 노래마다 검색
                     song, singer = None, None
-                    if "||" in song_data:
+                    if song_data.find("||") != -1:
                         song, singer = [
-                            x.strip()
-                            for x in list(
-                                map(str, "Day Dreaming || Jack & Jack".split("||"))
-                            )
+                            x.strip() for x in list(map(str, song_data.split("||")))
                         ]
                     else:
                         song = song_data
                     url_safe_search_keyword = self.generate_url_safe_search_keyword(
-                        song_data
+                        song, singer
                     )
                     self.find_song(url_safe_search_keyword)
 
