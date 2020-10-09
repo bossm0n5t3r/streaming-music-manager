@@ -73,11 +73,18 @@ class VibeScrapper(Scrapper):
             keyword = song + " - " + singer
         return quote(keyword)
 
-    def click_like(self):
+    def find_song(self, url_safe_search_keyword):
+        self.firefox_driver.get(
+            "https://vibe.naver.com/search?query=" + url_safe_search_keyword
+        )
+
+    def click_song_option(self):
         self.firefox_driver.find_element_by_css_selector(
             "#content > div:nth-child(2) > div > div:nth-child(2) > div.option"
         ).click()
         sleep(1)
+
+    def click_song_option_like(self):
         self.firefox_driver.find_element_by_css_selector(
             "#content > div:nth-child(2) > div > div:nth-child(2) > div.option > div > div > div > a:nth-child(2)"
         ).click()
@@ -93,10 +100,9 @@ class VibeScrapper(Scrapper):
                 url_safe_search_keyword = self.generate_url_safe_search_keyword(
                     song, singer
                 )
-                self.firefox_driver.get(
-                    "https://vibe.naver.com/search?query=" + url_safe_search_keyword
-                )
-                self.click_like()
+                self.find_song(url_safe_search_keyword)
+                self.click_song_option()
+                self.click_song_option_like()
                 print("Add song into like list Successed")
         except:
             print("Failed to add song into like list")
