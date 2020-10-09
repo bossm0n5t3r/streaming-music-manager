@@ -13,7 +13,8 @@ def main():
     # migrator.like("Day Dreaming", "Jack & Jack")
     # migrator.like("Day Dreaming")
     # migrator.add_play_list("test")
-    migrator.add_songs_into_play_list("test", ["Day Dreaming || Jack & Jack", "hello"])
+    # migrator.add_songs_into_play_list("test", ["Day Dreaming || Jack & Jack", "hello"])
+    migrator.scrap_my_play_list(66087627)
 
 
 if __name__ == "__main__":

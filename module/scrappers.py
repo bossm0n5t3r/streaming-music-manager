@@ -31,6 +31,32 @@ class VibeScrapper(Scrapper):
                 print("There is no more btn_more_list button")
                 isFound = False
 
+    def get_song_and_singer_from_like(self):
+        soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
+        title = soup.select(
+            "#content > div > div.track_section > div > div > table > tbody > tr > td.song > div.title_badge_wrap > span > a"
+        )
+        singer = soup.select(
+            "#content > div > div.track_section > div > div > table > tbody > tr > td.artist"
+        )
+        play_list = []
+        for i in range(len(title)):
+            play_list.append([title[i].text, singer[i]["title"]])
+        return play_list
+
+    def get_song_and_singer_from_play_list(self):
+        soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
+        title = soup.select(
+            "#content > div.track_section > div > div > table > tbody > tr > td.song > div.title_badge_wrap > span > a"
+        )
+        singer = soup.select(
+            "#content > div.track_section > div > div > table > tbody > tr > td.artist"
+        )
+        play_list = []
+        for i in range(len(title)):
+            play_list.append([title[i].text, singer[i]["title"]])
+        return play_list
+
     def scrap_like(self):
         try:
             isVibeLoginSuccess = self.utils.vibe_login(
@@ -42,16 +68,7 @@ class VibeScrapper(Scrapper):
                 self.firefox_driver.get(link)
                 sleep(3)
                 self.find_btn_more_list()
-                soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
-                title = soup.select(
-                    "#content > div > div.track_section > div > div > table > tbody > tr > td.song > div.title_badge_wrap > span > a"
-                )
-                singer = soup.select(
-                    "#content > div > div.track_section > div > div > table > tbody > tr > td.artist"
-                )
-                play_list = []
-                for i in range(len(title)):
-                    play_list.append([title[i].text, singer[i]["title"]])
+                play_list = self.get_song_and_singer_from_like()
                 with open("VIBE_Playlist.txt", "w", encoding="utf-8") as f:
                     for item in play_list:
                         song, singer = item
@@ -204,6 +221,35 @@ class VibeScrapper(Scrapper):
                 print("Add songs into play list Successed")
         except:
             print("Failed to add songs into play list")
+        finally:
+            self.utils.shutdown(
+                msg="VibeScrapper is closed", driver=self.firefox_driver
+            )
+
+    def scrap_my_play_list(self, my_play_list_number):
+        try:
+            isVibeLoginSuccess = self.utils.vibe_login(
+                driver=self.firefox_driver, id=self.id, pw=self.pw
+            )
+            if isVibeLoginSuccess:
+                print("scrap my play list songs")
+                link = "https://vibe.naver.com/mylist/" + str(my_play_list_number)
+                self.firefox_driver.get(link)
+                sleep(3)
+                self.find_btn_more_list()
+                play_list = self.get_song_and_singer_from_play_list()
+                with open(
+                    "VIBE_" + str(my_play_list_number) + "_Playlist.txt",
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    for item in play_list:
+                        song, singer = item
+                        f.write("%s || %s\n" % (song, singer))
+                f.close()
+                print("Scrap my play list songs Successed")
+        except:
+            print("Failed to scrap my play list songs")
         finally:
             self.utils.shutdown(
                 msg="VibeScrapper is closed", driver=self.firefox_driver
