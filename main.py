@@ -14,7 +14,8 @@ def main():
     # migrator.like("Day Dreaming")
     # migrator.add_play_list("test")
     # migrator.add_songs_into_play_list("test", ["Day Dreaming || Jack & Jack", "hello"])
-    migrator.scrap_my_play_list(66087627)
+    # migrator.scrap_my_play_list(66087627)
+    migrator.scrap_vibe_play_list("mood_lofi_0001")
 
 
 if __name__ == "__main__":

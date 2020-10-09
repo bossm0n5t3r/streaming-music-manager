@@ -254,3 +254,32 @@ class VibeScrapper(Scrapper):
             self.utils.shutdown(
                 msg="VibeScrapper is closed", driver=self.firefox_driver
             )
+
+    def scrap_vibe_play_list(self, play_list_name):
+        try:
+            isVibeLoginSuccess = self.utils.vibe_login(
+                driver=self.firefox_driver, id=self.id, pw=self.pw
+            )
+            if isVibeLoginSuccess:
+                print("scrap vibe play list songs")
+                link = "https://vibe.naver.com/playlist/" + play_list_name
+                self.firefox_driver.get(link)
+                sleep(3)
+                self.find_btn_more_list()
+                play_list = self.get_song_and_singer_from_play_list()
+                with open(
+                    "VIBE_" + play_list_name + "_Playlist.txt",
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    for item in play_list:
+                        song, singer = item
+                        f.write("%s || %s\n" % (song, singer))
+                f.close()
+                print("Scrap vibe play list songs Successed")
+        except:
+            print("Failed to scrap vibe play list songs")
+        finally:
+            self.utils.shutdown(
+                msg="VibeScrapper is closed", driver=self.firefox_driver
+            )
