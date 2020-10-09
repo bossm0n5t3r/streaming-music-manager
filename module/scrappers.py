@@ -8,10 +8,11 @@ import pyperclip
 
 
 class Scrapper(metaclass=ABCMeta):
-    def __init__(self, id=None, pw=None):
+    def __init__(self, email=None, id=None, pw=None):
         self.utils = Utils()
         # self.chrome_driver = self.utils.get_chrome_driver()
         self.firefox_driver = self.utils.get_firefox_driver()
+        self.email = email
         self.id = id
         self.pw = pw
 
@@ -282,4 +283,54 @@ class VibeScrapper(Scrapper):
         finally:
             self.utils.shutdown(
                 msg="VibeScrapper is closed", driver=self.firefox_driver
+            )
+
+
+class MelonScrapper(Scrapper):
+    def __init__(self, email=None, pw=None):
+        print("No login is required for Melon Scrapper")
+        super().__init__()
+
+    def scrap_my_page(self, page=None):
+        if page is not None:
+            self.firefox_driver.execute_script(
+                "javascript:pageObj.sendPage('" + str(page * 50 + 1) + "')"
+            )
+        soup = BeautifulSoup(self.firefox_driver.page_source, "html.parser")
+        title = soup.select(
+            "#frm > div > table > tbody > tr > td:nth-child(3) > div > div > a.fc_gray"
+        )
+        singer = soup.select("#artistName > a")
+        plist = []
+        for i in range(len(title)):
+            plist.append(title[i].text + " || " + singer[i].text)
+        return plist
+
+    def scrap_my_play_list(self, plylstSeq):
+        try:
+            link = (
+                "https://www.melon.com/mymusic/playlist/mymusicplaylistview_inform.htm?plylstSeq="
+                + str(plylstSeq)
+            )
+            self.firefox_driver.get(link)
+            sleep(1)
+            max_page = [
+                int(x)
+                for x in self.firefox_driver.find_element_by_class_name("page_num").text
+            ]
+            plist = self.scrap_my_page()
+            for page_num in max_page:
+                plist += self.scrap_my_page(page_num)
+            with open(
+                "Melon_" + str(plylstSeq) + "_Playlist.txt", "w", encoding="utf-8"
+            ) as f:
+                for data in plist:
+                    f.write("%s\n" % data)
+            f.close()
+            print("Scrap Melon My Playlist Successed")
+        except:
+            print("Failed to scrap Melon Playlist")
+        finally:
+            self.utils.shutdown(
+                msg="MelonScrapper is closed", driver=self.firefox_driver
             )

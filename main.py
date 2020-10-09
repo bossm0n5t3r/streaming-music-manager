@@ -1,21 +1,23 @@
 import os
 from module.utils import Utils
-from module.scrappers import VibeScrapper
+from module.scrappers import VibeScrapper, MelonScrapper
 from dotenv import load_dotenv
 
 
 def main():
-    load_dotenv(verbose=True)
-    id = os.getenv("NAVER_VIBE_ID")
-    pw = os.getenv("NAVER_VIBE_PW")
-    migrator = VibeScrapper(id=id, pw=pw)
+    # load_dotenv(verbose=True)
+    # id = os.getenv("NAVER_VIBE_ID")
+    # pw = os.getenv("NAVER_VIBE_PW")
+    # migrator = VibeScrapper(id=id, pw=pw)
     # migrator.scrap_like()
     # migrator.like("Day Dreaming", "Jack & Jack")
     # migrator.like("Day Dreaming")
     # migrator.add_play_list("test")
     # migrator.add_songs_into_play_list("test", ["Day Dreaming || Jack & Jack", "hello"])
     # migrator.scrap_my_play_list(66087627)
-    migrator.scrap_vibe_play_list("mood_lofi_0001")
+    # migrator.scrap_vibe_play_list("mood_lofi_0001")
+    migrator = MelonScrapper()
+    migrator.scrap_my_play_list(473916599)
 
 
 if __name__ == "__main__":
