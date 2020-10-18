@@ -71,9 +71,10 @@ class Utils:
             sleep(1)
             driver.find_element_by_class_name("kakao").click()
             sleep(1)
+            window_before = driver.window_handles[0]
+            window_after = driver.window_handles[1]
 
             # 카카오 로그인 창으로 이동
-            window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
             sleep(1)
 
@@ -82,6 +83,10 @@ class Utils:
             driver.find_element_by_id("id_password_3").send_keys(pw)
             sleep(1)
             driver.find_element_by_id("id_password_3").send_keys(Keys.RETURN)
+            sleep(1)
+
+            # 이전 화면으로 이동
+            driver.switch_to.window(window_before)
             sleep(1)
         except NoSuchElementException:
             result = False
