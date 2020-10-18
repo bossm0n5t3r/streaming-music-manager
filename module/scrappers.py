@@ -3,6 +3,7 @@ from urllib.parse import quote
 from abc import ABCMeta, abstractmethod
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.alert import Alert
 from module.utils import Utils
 import pyperclip
 
@@ -287,10 +288,6 @@ class VibeScrapper(Scrapper):
 
 
 class MelonScrapper(Scrapper):
-    def __init__(self, email=None, pw=None):
-        print("No login is required for Melon Scrapper")
-        super().__init__()
-
     def scrap_my_page(self, page=None):
         if page is not None:
             self.firefox_driver.execute_script(
@@ -376,6 +373,67 @@ class MelonScrapper(Scrapper):
             print("Scrap Melon Dj Playlist Successed")
         except:
             print("Failed to scrap Melon Dj Playlist")
+        finally:
+            self.utils.shutdown(
+                msg="MelonScrapper is closed", driver=self.firefox_driver
+            )
+
+    def search_keyword(self, song, singer=None):
+        keyword = ""
+        if singer is None:
+            keyword = song
+        else:
+            keyword = song + " - " + singer
+        return keyword
+
+    def add_play_list(self, play_list_name, song_datas):
+        try:
+            isMelonLoginSuccess = self.utils.melon_kakao_login(
+                driver=self.firefox_driver, email=self.email, pw=self.pw
+            )
+            if isMelonLoginSuccess:
+                print("Add new play list")
+                self.firefox_driver.get(
+                    "https://www.melon.com/mymusic/playlist/mymusicplaylistinsert_insert.htm"
+                )
+                self.firefox_driver.find_element_by_id("title").send_keys(
+                    play_list_name
+                )
+                sleep(1)
+                self.firefox_driver.find_element_by_xpath(
+                    '//span[text()="곡 검색"]'
+                ).click()
+                sleep(1)
+                d_kwd_element = self.firefox_driver.find_element_by_id("d_kwd")
+                for song_data in song_datas:
+                    # 각 노래마다 검색
+                    song, singer = None, None
+                    if song_data.find("||") != -1:
+                        song, singer = [
+                            x.strip() for x in list(map(str, song_data.split("||")))
+                        ]
+                    else:
+                        song = song_data
+                    keyword = self.search_keyword(song, singer)
+                    d_kwd_element.clear()
+                    sleep(1)
+                    d_kwd_element.send_keys(keyword)
+                    sleep(1)
+                    d_kwd_element.send_keys(Keys.RETURN)
+                    sleep(1)
+                    self.firefox_driver.find_element_by_css_selector(
+                        "#conts > div > div > div > div.music_list > div > ul > li.tab05_3.on > div > div.song_list.d_scrolldiv > table > tbody > tr > td.t_center > div > input"
+                    ).click()
+                    sleep(1)
+                    self.firefox_driver.find_element_by_class_name("move_right").click()
+                    sleep(1)
+                self.firefox_driver.find_element_by_class_name("btn_green_h30").click()
+                sleep(1)
+                Alert(self.firefox_driver).accept()
+                sleep(1)
+                print("Add new play list Successed")
+        except:
+            print("Failed to add new play list")
         finally:
             self.utils.shutdown(
                 msg="MelonScrapper is closed", driver=self.firefox_driver

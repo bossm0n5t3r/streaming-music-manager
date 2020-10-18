@@ -22,9 +22,11 @@ def main():
     load_dotenv(verbose=True)
     email = os.getenv("KAKAO_EMAIL")
     pw = os.getenv("KAKAO_PW")
-    utils = Utils()
-    driver = utils.get_firefox_driver()
-    utils.melon_kakao_login(driver=driver, email=email, pw=pw)
+    # utils = Utils()
+    # driver = utils.get_firefox_driver()
+    # utils.melon_kakao_login(driver=driver, email=email, pw=pw)
+    migrator = MelonScrapper(email=email, pw=pw)
+    migrator.add_play_list("hello", ["Day Dreaming || Jack & Jack", "hello"])
 
 
 if __name__ == "__main__":
